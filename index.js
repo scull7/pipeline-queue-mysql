@@ -1,5 +1,7 @@
+const express    = require('./lib/express');
+const QueuedPool = require('./lib/queued-pool');
 
 module.exports = {
-  express     : require('./lib/express')
-, queued_pool : require('./lib/queued-pool')
+  express
+, QueuedPool
 };
