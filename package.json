@@ -45,12 +45,14 @@
   "dependencies": {
     "moment": "^2.14.1",
     "node-cache": "^3.2.1",
+    "pipeline-queue": "^0.2.2",
     "ramda": "^0.22.1"
   },
   "devDependencies": {
     "chai": "^3.5.0",
     "coveralls": "^2.11.12",
     "istanbul": "^0.4.4",
-    "mocha": "^3.0.2"
+    "mocha": "^3.0.2",
+    "sinon": "^1.17.5"
   }
 }
