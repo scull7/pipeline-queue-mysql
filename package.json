@@ -45,5 +45,11 @@
   "dependencies": {
     "moment": "^2.14.1",
     "ramda": "^0.22.1"
+  },
+  "devDependencies": {
+    "chai": "^3.5.0",
+    "coveralls": "^2.11.12",
+    "istanbul": "^0.4.4",
+    "mocha": "^3.0.2"
   }
 }
