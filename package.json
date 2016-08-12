@@ -49,6 +49,7 @@
     "ramda": "^0.22.1"
   },
   "devDependencies": {
+    "bluebird": "^3.4.1",
     "chai": "^3.5.0",
     "coveralls": "^2.11.12",
     "istanbul": "^0.4.4",
