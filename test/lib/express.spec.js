@@ -1,4 +1,5 @@
 /*eslint-env node, mocha*/
+const Bluebird   = require('bluebird');
 const { expect } = require('chai');
 const sinon      = require('sinon');
 const MW         = require('../../lib/express');
@@ -14,7 +15,27 @@ const testConfig = {
 };
 
 
+let conn       = null;
+let pool       = null;
+let driver     = null;
+
+
 describe('expressjs Middleware', function() {
+
+  beforeEach(() => {
+
+    conn = { 
+      release: sinon.stub()
+    };
+    pool = {
+      getConnection : sinon.stub().yields(null, conn)
+    };
+
+    driver = {
+      createPool: sinon.stub().returns(pool)
+    };
+
+  });
 
   it('should be a function that returns a middleware function', () => {
 
@@ -44,6 +65,75 @@ describe('expressjs Middleware', function() {
       TypeError
     , /Your driver must support connection pooling/
     )
+
+  });
+
+
+  it('should create a connection pool and attach it to the ' +
+  ' request object', () => {
+
+    const mw = MW({ driver });
+
+    const req = {};
+    const res = {};
+
+    mw(req, res, () => {
+
+      expect(req.mysql).to.eql(conn);
+      expect(pool.getConnection.calledOnce).to.be.true;
+      expect(driver.createPool.calledOnce).to.be.true;
+
+    });
+
+  });
+
+
+  it('should cache multiple calls to the query method', (done) => {
+
+    const mw = MW({ driver });
+
+    const req = {};
+    const res = {};
+
+    const test_query  = 'foo, bar';
+    const test_params = [ 'foo', 'bar' ]
+
+    let calls = 0;
+    const queryStub   = (sql, params, cb) => {
+      expect(sql).to.eql(test_query);
+      expect(params).to.eql(test_params);
+      calls++;
+
+      setTimeout(cb, 10, null, 'foo');
+
+    };
+    conn.query        = queryStub;
+
+    const run = (req) => new Bluebird((resolve, reject) =>
+      req.mysql.query(test_query, test_params, (err, result) =>
+        err ? reject(err) : resolve(result)
+      )
+    );
+
+    mw(req, res, () => {
+
+      const x = run(req);
+      const y = run(req);
+
+      return Bluebird.all([ x, y ])
+
+      .then((results) => {
+
+        expect(results).to.deep.eql([ 'foo', 'foo' ]);
+        expect(calls).to.eql(1);
+
+        done();
+
+      })
+    
+      .catch(done);
+
+    });
 
   });
 
