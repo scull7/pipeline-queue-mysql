@@ -43,6 +43,29 @@ describe('default-cache', function() {
   });
 
 
+  it('should return the "same" object that is put into the cache',
+  (done) => {
+
+    const key = 'test';
+    const test = { foo: 'bar' };
+
+    cache.set(key, test, (err) => {
+      if (err) return done(err);
+
+      cache.get(key, (err, response) => {
+
+        if (err) return done(err);
+
+        expect(response).to.eql(test);
+        done();
+
+      });
+
+    });
+
+  });
+
+
   it('should allow the user to set and retrieve a value', (done) => {
 
     const key  = 'test';
