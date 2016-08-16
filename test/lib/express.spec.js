@@ -88,6 +88,49 @@ describe('expressjs Middleware', function() {
   });
 
 
+  it('should pass any connection error to the `next` function', (done) => {
+
+    pool.getConnection = sinon.stub().yields(new Error('boom!'));
+
+    const mw = MW({ driver });
+
+    mw({}, {}, (err) => {
+
+      expect(err.message).to.eql('boom!');
+      done();
+
+    });
+
+
+  });
+
+
+  it('should throw an error if you attempt to attach to an already ' +
+  'attached namespace',(done) => {
+    
+    const mw = MW({ driver });
+    const mw2 = MW({ driver });
+
+    const req = {};
+    const res = {};
+
+    mw(req, res, () => {
+
+      const test = () => mw2(req, res, done);
+
+      expect(test).to.throw(
+        Error,
+        /Namespace Collision: mysql/
+      );
+
+      done();
+
+    });
+
+
+  });
+
+
   it('should cache multiple calls to the query method', (done) => {
 
     const mw = MW({ driver });
