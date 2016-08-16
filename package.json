@@ -1,6 +1,6 @@
 {
   "name": "pipeline-queue-mysql",
-  "version": "0.0.1",
+  "version": "0.1.0",
   "description": "A MySql pool configured to use the pipeline cache module.",
   "main": "index.js",
   "scripts": {
@@ -31,8 +31,8 @@
       "ecmaFeatures": {}
     },
     "env": {
-      "node": true
-    , "es6": true
+      "node": true,
+      "es6": true
     },
     "ecmaFeatures": {
       "arrowFunctions": true,
