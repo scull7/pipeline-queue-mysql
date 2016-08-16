@@ -55,8 +55,8 @@ describe('lib/pool.js', function() {
     it('should return the unix timestamp of the given MySQL timestamp ',
     (done) => {
 
-      const mysql_time = '2016-08-16 07:53:49';
-      const expected   = 1471359229;
+      const mysql_time = '2016-08-16 07:53:49Z';
+      const expected = 1471334029;
 
       const field  = { type: 'TIMESTAMP', string: () => mysql_time };
       const next   = () => done('unexpected next call');
