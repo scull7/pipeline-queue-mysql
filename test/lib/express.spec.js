@@ -88,6 +88,24 @@ describe('expressjs Middleware', function() {
   });
 
 
+  it('should not patch an already patched handler', (done) => {
+
+    conn.query   = 'TEST';
+    conn.patched = true;
+
+    const mw     = MW({ driver });
+
+
+    mw({}, {}, () => {
+
+      expect(conn.query).to.eql('TEST');
+      done();
+
+    });
+
+  });
+
+
   it('should pass any connection error to the `next` function', (done) => {
 
     pool.getConnection = sinon.stub().yields(new Error('boom!'));
@@ -127,6 +145,88 @@ describe('expressjs Middleware', function() {
 
     });
 
+
+  });
+
+
+  it('should handle a buffer query', (done) => {
+
+    const mw           = MW({ driver });
+    const test_query   = 'בחר * ממבח';
+    const buffer_query = Buffer.from(test_query);
+
+    const queryStub = (sql, params, cb) => {
+      expect(sql).to.eql(buffer_query);
+      expect(params).to.deep.eql([]);
+
+      setTimeout(cb, 10, null, 'blah');
+    };
+
+    conn.query = queryStub;
+
+    const req = {};
+
+    mw(req, {}, () => req.mysql.query(buffer_query, (err, result) => {
+      expect(result).to.eql('blah');
+      done();
+    }));
+
+
+  });
+
+
+  it('should allow only the query to be passed.', (done) => {
+
+    const mw = MW({ driver });
+
+    const test_query = 'DESUMO * A PROBATIO';
+
+    const queryStub = (sql, params, cb) => {
+      expect(sql).to.eql(test_query);
+      expect(params).to.deep.eql([]);
+      expect(cb).to.be.a('function');
+
+      // call for posterity's sake
+      cb();
+
+      done();
+    };
+    conn.query = queryStub;
+
+    const req = {};
+
+    mw(req, {}, () => req.mysql.query(test_query));
+
+  });
+
+
+  it('should set the params to an empty array when not provided', (done) => {
+
+    const mw = MW({ driver });
+
+    const test_query = 'SELECT * FROM `test`';
+
+    const queryStub = (sql, params, cb) => {
+      expect(sql).to.eql(test_query);
+      expect(params).to.deep.eql([]);
+
+      setTimeout(cb, 10, null, 'foo');
+    };
+    conn.query = queryStub;
+
+    const req = {};
+
+    mw(req, {}, () => {
+
+      req.mysql.query(test_query, (err, result) => {
+
+        expect(result).to.eql('foo');
+        expect(err).to.be.null;
+        done();
+
+      });
+
+    });
 
   });
 
